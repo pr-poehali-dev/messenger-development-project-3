@@ -32,7 +32,7 @@ export default function Sidebar({
             <div className="w-7 h-7 rounded-lg btn-gradient flex items-center justify-center">
               <Icon name="Zap" size={14} className="text-white" />
             </div>
-            <span className="text-base font-bold font-golos gradient-text">Pulse</span>
+            <span className="text-base font-bold font-golos gradient-text">Чат Да!</span>
           </div>
           {activeTab === "chats" && (
             <button

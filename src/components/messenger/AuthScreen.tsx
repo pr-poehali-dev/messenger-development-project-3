@@ -36,7 +36,7 @@ export default function AuthScreen({ onLogin }: Props) {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl mb-3 btn-gradient glow-purple">
             <Icon name="Zap" size={24} className="text-white" />
           </div>
-          <h1 className="text-3xl font-bold font-golos gradient-text">Pulse</h1>
+          <h1 className="text-3xl font-bold font-golos gradient-text">Чат Да!</h1>
           <p className="text-muted-foreground mt-1 text-xs">Мессенджер нового поколения</p>
         </div>
 
