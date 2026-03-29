@@ -94,7 +94,7 @@ export default function ChatWindow({ chat, currentUserId, onUpdateChat }: Props)
       <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-card/80 backdrop-blur-sm">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <div className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold text-white ${
+            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white ${
               chat.type === "group" ? "bg-gradient-to-br from-purple-500 to-pink-500" : "btn-gradient"
             }`}>
               {chat.avatar.length <= 2 ? chat.avatar : "🎨"}
