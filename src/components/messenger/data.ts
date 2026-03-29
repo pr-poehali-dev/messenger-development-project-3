@@ -41,7 +41,9 @@ export const CONTACTS: Contact[] = [
   { id: "sergey", name: "Сергей Новиков", avatar: "СН", online: false, username: "@sergey_n", bio: "Backend dev · Rust 🦀" },
 ];
 
-export const INITIAL_CHATS: Chat[] = [
+export const INITIAL_CHATS: Chat[] = []
+
+export const INITIAL_CHATS_DEMO: Chat[] = [
   {
     id: 1,
     type: "private",

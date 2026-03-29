@@ -24,7 +24,7 @@ interface Props {
 }
 
 export default function MainLayout({ user, onLogout, onUpdateUser }: Props) {
-  const [chats, setChats] = useLocalStorage<Chat[]>("chatda_chats", INITIAL_CHATS);
+  const [chats, setChats] = useLocalStorage<Chat[]>("chatda_chats_v2", INITIAL_CHATS);
   const [activeChat, setActiveChat] = useState<Chat | null>(null);
   const [activeTab, setActiveTab] = useState<Tab>("chats");
   const [searchQuery, setSearchQuery] = useState("");

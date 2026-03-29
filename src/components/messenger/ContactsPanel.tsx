@@ -3,17 +3,21 @@ import Icon from "@/components/ui/icon";
 import { CONTACTS, Contact } from "./data";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
 
-// «База» всех возможных людей для поиска (включая дефолтные контакты + доп.)
 const ALL_PEOPLE: Contact[] = [
-  ...CONTACTS,
-  { id: "nikita", name: "Никита Орлов", avatar: "НО", online: true, username: "@nikita_o", bio: "Фотограф · 📸" },
-  { id: "olga", name: "Ольга Зайцева", avatar: "ОЗ", online: false, username: "@olga_z", bio: "Бухгалтер · Люблю кошек 🐱" },
-  { id: "pavel", name: "Павел Громов", avatar: "ПГ", online: true, username: "@pavel_g", bio: "Продакт-менеджер" },
-  { id: "elena", name: "Елена Соколова", avatar: "ЕС2", online: false, username: "@elena_s", bio: "Юрист · ⚖️" },
-  { id: "roman", name: "Роман Федоров", avatar: "РФ", online: false, username: "@roman_f", bio: "DevOps · ☁️" },
-  { id: "tanya", name: "Татьяна Макарова", avatar: "ТМ", online: true, username: "@tanya_m", bio: "SMM · Контент 📱" },
-  { id: "alex2", name: "Алексей Борисов", avatar: "АБ2", online: false, username: "@alex_b", bio: "Архитектор · 🏗️" },
-  { id: "ksenia", name: "Ксения Попова", avatar: "КП", online: true, username: "@ksenia_p", bio: "HR · Люди и команды 👥" },
+  { id: "masha", name: "Мария Петрова", avatar: "МП", online: true, username: "masha_p", bio: "Дизайнер · Люблю горы ⛰️" },
+  { id: "dima", name: "Дмитрий Волков", avatar: "ДВ", online: false, username: "dima_v", bio: "Разработчик · Coffee ☕" },
+  { id: "katya", name: "Екатерина Смирнова", avatar: "ЕС", online: true, username: "katya_s", bio: "Маркетолог · 📊" },
+  { id: "ivan", name: "Иван Козлов", avatar: "ИК", online: false, username: "ivan_k", bio: "Менеджер проектов" },
+  { id: "anna", name: "Анна Белова", avatar: "АБ", online: true, username: "anna_b", bio: "UX/UI · Путешественница ✈️" },
+  { id: "sergey", name: "Сергей Новиков", avatar: "СН", online: false, username: "sergey_n", bio: "Backend dev · Rust 🦀" },
+  { id: "nikita", name: "Никита Орлов", avatar: "НО", online: true, username: "nikita_o", bio: "Фотограф · 📸" },
+  { id: "olga", name: "Ольга Зайцева", avatar: "ОЗ", online: false, username: "olga_z", bio: "Бухгалтер · Люблю кошек 🐱" },
+  { id: "pavel", name: "Павел Громов", avatar: "ПГ", online: true, username: "pavel_g", bio: "Продакт-менеджер" },
+  { id: "elena", name: "Елена Соколова", avatar: "ЕС", online: false, username: "elena_s", bio: "Юрист · ⚖️" },
+  { id: "roman", name: "Роман Федоров", avatar: "РФ", online: false, username: "roman_f", bio: "DevOps · ☁️" },
+  { id: "tanya", name: "Татьяна Макарова", avatar: "ТМ", online: true, username: "tanya_m", bio: "SMM · Контент 📱" },
+  { id: "alexb", name: "Алексей Борисов", avatar: "АБ", online: false, username: "alex_b", bio: "Архитектор · 🏗️" },
+  { id: "ksenia", name: "Ксения Попова", avatar: "КП", online: true, username: "ksenia_p", bio: "HR · Люди и команды 👥" },
 ];
 
 interface Props {
@@ -21,13 +25,13 @@ interface Props {
 }
 
 export default function ContactsPanel({ onStartChat }: Props) {
-  const [myContacts, setMyContacts] = useLocalStorage<Contact[]>(
-    "chatda_contacts",
-    CONTACTS
-  );
+  const [myContacts, setMyContacts] = useLocalStorage<Contact[]>("chatda_contacts", CONTACTS);
   const [search, setSearch] = useState("");
   const [mode, setMode] = useState<"my" | "search">("my");
   const [added, setAdded] = useState<string | null>(null);
+  const [showAddManual, setShowAddManual] = useState(false);
+  const [manualName, setManualName] = useState("");
+  const [manualUsername, setManualUsername] = useState("");
 
   const addContact = (person: Contact) => {
     if (!myContacts.find(c => c.id === person.id)) {
@@ -37,23 +41,45 @@ export default function ContactsPanel({ onStartChat }: Props) {
     setTimeout(() => setAdded(null), 1500);
   };
 
+  const addManual = () => {
+    if (!manualName.trim()) return;
+    const id = "manual_" + Date.now();
+    const initials = manualName.trim().split(" ").map(w => w[0]).join("").slice(0, 2).toUpperCase();
+    const person: Contact = {
+      id,
+      name: manualName.trim(),
+      avatar: initials,
+      online: false,
+      username: manualUsername.trim().replace("@", "") || id,
+      bio: "",
+    };
+    setMyContacts(prev => [...prev, person]);
+    setManualName("");
+    setManualUsername("");
+    setShowAddManual(false);
+  };
+
   const removeContact = (id: string) => {
     setMyContacts(prev => prev.filter(c => c.id !== id));
   };
 
-  // Поиск по всем людям включая уже добавленных
-  const searchResults = search.trim().length > 0
+  // Нормализуем строку: убираем @, пробелы, в нижний регистр
+  const normalize = (s: string) => s.toLowerCase().replace("@", "").trim();
+
+  const q = normalize(search);
+
+  const searchResults = q.length > 0
     ? ALL_PEOPLE.filter(p =>
-        p.name.toLowerCase().includes(search.toLowerCase()) ||
-        p.username.toLowerCase().includes(search.toLowerCase()) ||
-        (p.bio && p.bio.toLowerCase().includes(search.toLowerCase()))
+        normalize(p.name).includes(q) ||
+        normalize(p.username).includes(q) ||
+        (p.bio && normalize(p.bio).includes(q))
       )
     : ALL_PEOPLE;
 
-  const myFiltered = search.trim().length > 0 && mode === "my"
+  const myFiltered = q.length > 0 && mode === "my"
     ? myContacts.filter(c =>
-        c.name.toLowerCase().includes(search.toLowerCase()) ||
-        c.username.toLowerCase().includes(search.toLowerCase())
+        normalize(c.name).includes(q) ||
+        normalize(c.username).includes(q)
       )
     : myContacts;
 
@@ -70,30 +96,63 @@ export default function ContactsPanel({ onStartChat }: Props) {
             <p className="text-xs text-muted-foreground">{myContacts.filter(c => c.online).length} в сети · {myContacts.length} всего</p>
           </div>
           <button
-            onClick={() => { setMode(mode === "search" ? "my" : "search"); setSearch(""); }}
+            onClick={() => setShowAddManual(!showAddManual)}
             className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
-              mode === "search" ? "btn-gradient text-white" : "bg-secondary text-muted-foreground hover:bg-border"
+              showAddManual ? "btn-gradient text-white" : "bg-secondary text-muted-foreground hover:bg-border"
             }`}
           >
-            <Icon name={mode === "search" ? "X" : "UserPlus"} size={15} />
+            <Icon name={showAddManual ? "X" : "UserPlus"} size={15} />
           </button>
         </div>
 
-        {/* Search input */}
-        <div className="relative">
+        {/* Добавить вручную */}
+        {showAddManual && (
+          <div className="mb-3 p-3 rounded-xl bg-secondary border border-primary/20 animate-fade-in space-y-2">
+            <p className="text-xs font-semibold text-primary">Добавить контакт вручную</p>
+            <input
+              type="text"
+              placeholder="Имя Фамилия"
+              value={manualName}
+              onChange={e => setManualName(e.target.value)}
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary/50"
+            />
+            <input
+              type="text"
+              placeholder="username (без @)"
+              value={manualUsername}
+              onChange={e => setManualUsername(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && addManual()}
+              className="w-full bg-background border border-border rounded-lg px-3 py-2 text-sm outline-none focus:border-primary/50"
+            />
+            <button
+              onClick={addManual}
+              disabled={!manualName.trim()}
+              className="w-full py-2 rounded-lg btn-gradient text-white text-xs font-semibold disabled:opacity-40"
+            >
+              Добавить
+            </button>
+          </div>
+        )}
+
+        {/* Search */}
+        <div className="relative mb-2">
           <Icon name="Search" size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <input
             type="text"
-            placeholder={mode === "search" ? "Найти человека по имени..." : "Поиск в контактах..."}
+            placeholder="Имя или username..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            autoFocus={mode === "search"}
             className="w-full bg-secondary border border-border rounded-xl pl-8 pr-3 py-2 text-sm outline-none focus:border-primary/50 transition-all"
           />
+          {search && (
+            <button onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2">
+              <Icon name="X" size={12} className="text-muted-foreground" />
+            </button>
+          )}
         </div>
 
-        {/* Mode tabs */}
-        <div className="flex gap-1 mt-2">
+        {/* Tabs */}
+        <div className="flex gap-1">
           <button
             onClick={() => setMode("my")}
             className={`flex-1 py-1.5 rounded-lg text-xs font-medium transition-all ${
@@ -115,58 +174,53 @@ export default function ContactsPanel({ onStartChat }: Props) {
 
       <div className="flex-1 overflow-y-auto p-3">
 
-        {/* === РЕЖИМ ПОИСКА === */}
+        {/* === НАЙТИ ЛЮДЕЙ === */}
         {mode === "search" && (
-          <>
-            {searchResults.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-sm text-muted-foreground">Никого не найдено</p>
-                <p className="text-xs text-muted-foreground mt-1">Попробуйте другое имя</p>
-              </div>
-            ) : (
-              <div className="space-y-1">
-                <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2">
-                  {search.trim() ? `Результаты · ${searchResults.length}` : `Все люди · ${searchResults.length}`}
-                </p>
-                {searchResults.map((person, i) => (
-                  <div
-                    key={person.id}
-                    className="flex items-center gap-3 p-3 rounded-2xl bg-secondary/50 hover:bg-secondary transition-all animate-slide-in-up"
-                    style={{ animationDelay: `${i * 0.04}s`, animationFillMode: "both" }}
-                  >
-                    <div className="relative flex-shrink-0">
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white ${person.online ? "btn-gradient" : "bg-border"}`}>
-                        {person.avatar.replace(/\d/g, "")}
-                      </div>
-                      {person.online && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background online-dot" />}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm">{person.name}</p>
-                      <p className="text-[11px] text-muted-foreground truncate">{person.bio || person.username}</p>
-                    </div>
-                    {myContacts.find(c => c.id === person.id) ? (
-                      <span className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-primary/10 text-primary">
-                        <Icon name="Check" size={12} />
-                        В контактах
-                      </span>
-                    ) : (
-                      <button
-                        onClick={() => addContact(person)}
-                        className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                          added === person.id
-                            ? "bg-green-500/20 text-green-400"
-                            : "btn-gradient text-white hover:scale-105"
-                        }`}
-                      >
-                        <Icon name={added === person.id ? "Check" : "UserPlus"} size={12} />
-                        {added === person.id ? "Добавлен!" : "Добавить"}
-                      </button>
-                    )}
-                  </div>
-                ))}
-              </div>
+          <div className="space-y-1">
+            <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2">
+              {q ? `Найдено · ${searchResults.length}` : `Все · ${searchResults.length}`}
+            </p>
+            {searchResults.length === 0 && (
+              <div className="text-center py-10 text-muted-foreground text-sm">Никого не найдено</div>
             )}
-          </>
+            {searchResults.map((person, i) => {
+              const isAdded = !!myContacts.find(c => c.id === person.id);
+              return (
+                <div
+                  key={person.id}
+                  className="flex items-center gap-3 p-3 rounded-2xl bg-secondary/50 hover:bg-secondary transition-all animate-slide-in-up"
+                  style={{ animationDelay: `${i * 0.03}s`, animationFillMode: "both" }}
+                >
+                  <div className="relative flex-shrink-0">
+                    <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white ${person.online ? "btn-gradient" : "bg-muted"}`}>
+                      {person.avatar}
+                    </div>
+                    {person.online && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background online-dot" />}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm">{person.name}</p>
+                    <p className="text-[11px] text-muted-foreground">@{person.username}</p>
+                  </div>
+                  {isAdded ? (
+                    <span className="flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold bg-primary/10 text-primary">
+                      <Icon name="Check" size={11} />
+                      В контактах
+                    </span>
+                  ) : (
+                    <button
+                      onClick={() => addContact(person)}
+                      className={`flex-shrink-0 flex items-center gap-1 px-2.5 py-1.5 rounded-xl text-[11px] font-semibold transition-all ${
+                        added === person.id ? "bg-green-500/20 text-green-400" : "btn-gradient text-white hover:scale-105"
+                      }`}
+                    >
+                      <Icon name={added === person.id ? "Check" : "UserPlus"} size={11} />
+                      {added === person.id ? "Добавлен!" : "Добавить"}
+                    </button>
+                  )}
+                </div>
+              );
+            })}
+          </div>
         )}
 
         {/* === МОИ КОНТАКТЫ === */}
@@ -174,7 +228,7 @@ export default function ContactsPanel({ onStartChat }: Props) {
           <>
             {myFiltered.length === 0 && (
               <div className="text-center py-12 text-muted-foreground text-sm">
-                {search ? "Не найдено по запросу" : "Контакты пусты"}
+                {q ? `Никого не найдено по «${search}»` : "Контакты пусты"}
               </div>
             )}
 
@@ -183,13 +237,7 @@ export default function ContactsPanel({ onStartChat }: Props) {
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2">В сети · {online.length}</p>
                 <div className="space-y-1">
                   {online.map((c, i) => (
-                    <ContactRow
-                      key={c.id}
-                      contact={c}
-                      delay={i * 0.04}
-                      onChat={() => { onStartChat(c.name, c.avatar); }}
-                      onRemove={() => removeContact(c.id)}
-                    />
+                    <ContactRow key={c.id} contact={c} delay={i * 0.03} onChat={() => onStartChat(c.name, c.avatar)} onRemove={() => removeContact(c.id)} />
                   ))}
                 </div>
               </div>
@@ -200,13 +248,7 @@ export default function ContactsPanel({ onStartChat }: Props) {
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2">Не в сети · {offline.length}</p>
                 <div className="space-y-1">
                   {offline.map((c, i) => (
-                    <ContactRow
-                      key={c.id}
-                      contact={c}
-                      delay={(online.length + i) * 0.04}
-                      onChat={() => { onStartChat(c.name, c.avatar); }}
-                      onRemove={() => removeContact(c.id)}
-                    />
+                    <ContactRow key={c.id} contact={c} delay={(online.length + i) * 0.03} onChat={() => onStartChat(c.name, c.avatar)} onRemove={() => removeContact(c.id)} />
                   ))}
                 </div>
               </div>
@@ -227,10 +269,7 @@ export default function ContactsPanel({ onStartChat }: Props) {
 }
 
 function ContactRow({ contact, delay, onChat, onRemove }: {
-  contact: Contact;
-  delay: number;
-  onChat: () => void;
-  onRemove: () => void;
+  contact: Contact; delay: number; onChat: () => void; onRemove: () => void;
 }) {
   const [showMenu, setShowMenu] = useState(false);
   return (
@@ -239,21 +278,20 @@ function ContactRow({ contact, delay, onChat, onRemove }: {
       style={{ animationDelay: `${delay}s`, animationFillMode: "both" }}
     >
       <div className="relative flex-shrink-0">
-        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white ${contact.online ? "btn-gradient" : "bg-secondary border border-border text-muted-foreground"}`}>
-          {contact.avatar.replace(/\d/g, "")}
+        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-xs font-bold text-white ${contact.online ? "btn-gradient" : "bg-muted text-muted-foreground"}`}>
+          {contact.avatar}
         </div>
-        {contact.online && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background online-dot" />}
-        {!contact.online && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-muted rounded-full border-2 border-background" />}
+        {contact.online
+          ? <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background online-dot" />
+          : <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-muted rounded-full border-2 border-background" />
+        }
       </div>
       <div className="flex-1 min-w-0">
         <p className={`font-semibold text-sm ${!contact.online ? "text-muted-foreground" : ""}`}>{contact.name}</p>
-        <p className="text-[11px] text-muted-foreground truncate">{contact.bio || contact.username}</p>
+        <p className="text-[11px] text-muted-foreground">@{contact.username.replace("@", "")}</p>
       </div>
       <div className="hidden group-hover:flex gap-1 items-center">
-        <button
-          onClick={onChat}
-          className="w-8 h-8 rounded-xl btn-gradient flex items-center justify-center transition-all hover:scale-110"
-        >
+        <button onClick={onChat} className="w-8 h-8 rounded-xl btn-gradient flex items-center justify-center transition-all hover:scale-110">
           <Icon name="MessageCircle" size={13} className="text-white" />
         </button>
         <button
@@ -264,23 +302,12 @@ function ContactRow({ contact, delay, onChat, onRemove }: {
         </button>
       </div>
       {showMenu && (
-        <div
-          className="absolute right-2 top-12 z-30 bg-card border border-border rounded-xl shadow-xl py-1 min-w-[140px] animate-scale-in"
-          onClick={(e) => e.stopPropagation()}
-        >
-          <button
-            onClick={() => { onChat(); setShowMenu(false); }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary transition-colors"
-          >
-            <Icon name="MessageCircle" size={14} className="text-primary" />
-            Написать
+        <div className="absolute right-2 top-12 z-30 bg-card border border-border rounded-xl shadow-xl py-1 min-w-[140px] animate-scale-in" onClick={e => e.stopPropagation()}>
+          <button onClick={() => { onChat(); setShowMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary transition-colors">
+            <Icon name="MessageCircle" size={14} className="text-primary" /> Написать
           </button>
-          <button
-            onClick={() => { onRemove(); setShowMenu(false); }}
-            className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary transition-colors text-destructive"
-          >
-            <Icon name="UserMinus" size={14} />
-            Удалить контакт
+          <button onClick={() => { onRemove(); setShowMenu(false); }} className="w-full flex items-center gap-2 px-3 py-2 text-sm hover:bg-secondary transition-colors text-destructive">
+            <Icon name="UserMinus" size={14} /> Удалить контакт
           </button>
         </div>
       )}
