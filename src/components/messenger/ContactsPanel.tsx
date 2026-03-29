@@ -41,14 +41,14 @@ export default function ContactsPanel({ onStartChat }: Props) {
     setMyContacts(prev => prev.filter(c => c.id !== id));
   };
 
-  // Поиск по всем людям (исключая уже добавленных)
+  // Поиск по всем людям включая уже добавленных
   const searchResults = search.trim().length > 0
     ? ALL_PEOPLE.filter(p =>
-        (p.name.toLowerCase().includes(search.toLowerCase()) ||
-         p.username.toLowerCase().includes(search.toLowerCase())) &&
-        !myContacts.find(c => c.id === p.id)
+        p.name.toLowerCase().includes(search.toLowerCase()) ||
+        p.username.toLowerCase().includes(search.toLowerCase()) ||
+        (p.bio && p.bio.toLowerCase().includes(search.toLowerCase()))
       )
-    : [];
+    : ALL_PEOPLE;
 
   const myFiltered = search.trim().length > 0 && mode === "my"
     ? myContacts.filter(c =>
@@ -118,23 +118,15 @@ export default function ContactsPanel({ onStartChat }: Props) {
         {/* === РЕЖИМ ПОИСКА === */}
         {mode === "search" && (
           <>
-            {search.trim().length === 0 ? (
+            {searchResults.length === 0 ? (
               <div className="text-center py-12">
-                <div className="w-14 h-14 rounded-full btn-gradient mx-auto mb-3 flex items-center justify-center opacity-60">
-                  <Icon name="Search" size={24} className="text-white" />
-                </div>
-                <p className="text-sm font-medium mb-1">Найдите людей</p>
-                <p className="text-xs text-muted-foreground">Введите имя или @username</p>
-              </div>
-            ) : searchResults.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-sm text-muted-foreground">Никого не найдено по запросу</p>
-                <p className="text-xs text-muted-foreground mt-1">«{search}»</p>
+                <p className="text-sm text-muted-foreground">Никого не найдено</p>
+                <p className="text-xs text-muted-foreground mt-1">Попробуйте другое имя</p>
               </div>
             ) : (
               <div className="space-y-1">
                 <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-1 mb-2">
-                  Результаты · {searchResults.length}
+                  {search.trim() ? `Результаты · ${searchResults.length}` : `Все люди · ${searchResults.length}`}
                 </p>
                 {searchResults.map((person, i) => (
                   <div
@@ -152,17 +144,24 @@ export default function ContactsPanel({ onStartChat }: Props) {
                       <p className="font-semibold text-sm">{person.name}</p>
                       <p className="text-[11px] text-muted-foreground truncate">{person.bio || person.username}</p>
                     </div>
-                    <button
-                      onClick={() => addContact(person)}
-                      className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
-                        added === person.id
-                          ? "bg-green-500/20 text-green-400"
-                          : "btn-gradient text-white hover:scale-105"
-                      }`}
-                    >
-                      <Icon name={added === person.id ? "Check" : "UserPlus"} size={12} />
-                      {added === person.id ? "Добавлен!" : "Добавить"}
-                    </button>
+                    {myContacts.find(c => c.id === person.id) ? (
+                      <span className="flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold bg-primary/10 text-primary">
+                        <Icon name="Check" size={12} />
+                        В контактах
+                      </span>
+                    ) : (
+                      <button
+                        onClick={() => addContact(person)}
+                        className={`flex-shrink-0 flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold transition-all ${
+                          added === person.id
+                            ? "bg-green-500/20 text-green-400"
+                            : "btn-gradient text-white hover:scale-105"
+                        }`}
+                      >
+                        <Icon name={added === person.id ? "Check" : "UserPlus"} size={12} />
+                        {added === person.id ? "Добавлен!" : "Добавить"}
+                      </button>
+                    )}
                   </div>
                 ))}
               </div>
