@@ -28,7 +28,7 @@ export default function ContactsPanel({ onStartChat }: Props) {
                 style={{ animationDelay: `${i * 0.05}s`, animationFillMode: "both" }}
               >
                 <div className="relative">
-                  <div className="w-11 h-11 rounded-2xl btn-gradient flex items-center justify-center text-sm font-bold text-white">
+                  <div className="w-11 h-11 rounded-full btn-gradient flex items-center justify-center text-sm font-bold text-white">
                     {c.avatar}
                   </div>
                   <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-background online-dot" />
@@ -64,7 +64,7 @@ export default function ContactsPanel({ onStartChat }: Props) {
                 style={{ animationDelay: `${(online.length + i) * 0.05}s`, animationFillMode: "both" }}
               >
                 <div className="relative">
-                  <div className="w-11 h-11 rounded-2xl bg-secondary flex items-center justify-center text-sm font-bold text-muted-foreground">
+                  <div className="w-11 h-11 rounded-full bg-secondary flex items-center justify-center text-sm font-bold text-muted-foreground">
                     {c.avatar}
                   </div>
                   <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-muted rounded-full border-2 border-background" />
