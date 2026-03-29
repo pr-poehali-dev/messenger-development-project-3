@@ -91,21 +91,21 @@ export default function ChatWindow({ chat, currentUserId, onUpdateChat }: Props)
   return (
     <div className="flex flex-col flex-1 h-full">
       {/* Header */}
-      <div className="flex items-center justify-between px-5 py-3.5 border-b border-border bg-card/80 backdrop-blur-sm">
-        <div className="flex items-center gap-3">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/80 backdrop-blur-sm">
+        <div className="flex items-center gap-2.5">
           <div className="relative">
-            <div className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold text-white ${
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${
               chat.type === "group" ? "bg-gradient-to-br from-purple-500 to-pink-500" : "btn-gradient"
             }`}>
               {chat.avatar.length <= 2 ? chat.avatar : "🎨"}
             </div>
             {chat.online && (
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-card online-dot" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-green-500 rounded-full border-2 border-card online-dot" />
             )}
           </div>
           <div>
-            <p className="font-semibold text-sm">{chat.name}</p>
-            <p className="text-xs text-muted-foreground">
+            <p className="font-semibold text-sm leading-tight">{chat.name}</p>
+            <p className="text-[11px] text-muted-foreground leading-tight">
               {isTyping ? (
                 <span className="text-primary animate-pulse">печатает...</span>
               ) : chat.online ? (
@@ -118,26 +118,26 @@ export default function ChatWindow({ chat, currentUserId, onUpdateChat }: Props)
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
           <button
             onClick={() => { setSearchMode(!searchMode); setSearchQuery(""); }}
-            className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+            className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors ${
               searchMode ? "bg-primary/20 text-primary" : "hover:bg-secondary text-muted-foreground"
             }`}
           >
-            <Icon name="Search" size={16} />
+            <Icon name="Search" size={14} />
           </button>
           <button
             onClick={() => setShowInfo(!showInfo)}
-            className="w-8 h-8 rounded-lg hover:bg-secondary flex items-center justify-center text-muted-foreground transition-colors"
+            className="w-7 h-7 rounded-lg hover:bg-secondary flex items-center justify-center text-muted-foreground transition-colors"
           >
-            <Icon name="Info" size={16} />
+            <Icon name="Info" size={14} />
           </button>
-          <button className="w-8 h-8 rounded-lg hover:bg-secondary flex items-center justify-center text-muted-foreground transition-colors">
-            <Icon name="Phone" size={16} />
+          <button className="w-7 h-7 rounded-lg hover:bg-secondary flex items-center justify-center text-muted-foreground transition-colors">
+            <Icon name="Phone" size={14} />
           </button>
-          <button className="w-8 h-8 rounded-lg hover:bg-secondary flex items-center justify-center text-muted-foreground transition-colors">
-            <Icon name="Video" size={16} />
+          <button className="w-7 h-7 rounded-lg hover:bg-secondary flex items-center justify-center text-muted-foreground transition-colors">
+            <Icon name="Video" size={14} />
           </button>
         </div>
       </div>
@@ -291,12 +291,12 @@ export default function ChatWindow({ chat, currentUserId, onUpdateChat }: Props)
       )}
 
       {/* Input */}
-      <div className="px-4 py-3 border-t border-border bg-card/80 backdrop-blur-sm">
-        <div className="flex items-end gap-2">
-          <button className="w-9 h-9 rounded-xl hover:bg-secondary flex items-center justify-center text-muted-foreground transition-colors flex-shrink-0 mb-0.5">
-            <Icon name="Paperclip" size={18} />
+      <div className="px-3 py-2 border-t border-border bg-card/80 backdrop-blur-sm">
+        <div className="flex items-center gap-1.5">
+          <button className="w-8 h-8 rounded-lg hover:bg-secondary flex items-center justify-center text-muted-foreground transition-colors flex-shrink-0">
+            <Icon name="Paperclip" size={15} />
           </button>
-          <div className="flex-1 bg-secondary border border-border rounded-2xl flex items-end px-4 py-2.5 gap-2 transition-all focus-within:border-primary/50">
+          <div className="flex-1 bg-secondary border border-border rounded-xl flex items-center px-3 py-2 gap-2 transition-all focus-within:border-primary/50">
             <input
               ref={inputRef}
               type="text"
@@ -304,22 +304,22 @@ export default function ChatWindow({ chat, currentUserId, onUpdateChat }: Props)
               onChange={(e) => setInputText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), sendMessage())}
               placeholder="Написать сообщение..."
-              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none resize-none"
+              className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground outline-none"
             />
-            <button className="text-muted-foreground hover:text-foreground transition-colors">
-              <Icon name="Smile" size={18} />
+            <button className="text-muted-foreground hover:text-foreground transition-colors flex-shrink-0">
+              <Icon name="Smile" size={15} />
             </button>
           </div>
           <button
             onClick={sendMessage}
             disabled={!inputText.trim()}
-            className={`w-10 h-10 rounded-2xl flex items-center justify-center flex-shrink-0 transition-all ${
+            className={`w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 transition-all ${
               inputText.trim()
                 ? "btn-gradient shadow-lg hover:scale-105 glow-purple"
                 : "bg-secondary text-muted-foreground cursor-not-allowed"
             }`}
           >
-            <Icon name="Send" size={18} className={inputText.trim() ? "text-white" : ""} />
+            <Icon name="Send" size={14} className={inputText.trim() ? "text-white" : ""} />
           </button>
         </div>
       </div>
