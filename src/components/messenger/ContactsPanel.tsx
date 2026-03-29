@@ -2,6 +2,7 @@ import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { CONTACTS, Contact } from "./data";
 import { useLocalStorage } from "@/hooks/useLocalStorage";
+import { getRegistry } from "@/lib/usersRegistry";
 
 const ALL_PEOPLE: Contact[] = [
   { id: "masha", name: "Мария Петрова", avatar: "МП", online: true, username: "masha_p", bio: "Дизайнер · Люблю горы ⛰️" },
@@ -32,6 +33,13 @@ export default function ContactsPanel({ onStartChat }: Props) {
   const [showAddManual, setShowAddManual] = useState(false);
   const [manualName, setManualName] = useState("");
   const [manualUsername, setManualUsername] = useState("");
+
+  // Объединяем статичных людей + всех кто зарегался в браузере
+  const registryUsers = getRegistry();
+  const allPeopleWithRegistry = [
+    ...ALL_PEOPLE,
+    ...registryUsers.filter(u => !ALL_PEOPLE.find(p => p.id === u.id)),
+  ];
 
   const addContact = (person: Contact) => {
     if (!myContacts.find(c => c.id === person.id)) {
@@ -69,12 +77,12 @@ export default function ContactsPanel({ onStartChat }: Props) {
   const q = normalize(search);
 
   const searchResults = q.length > 0
-    ? ALL_PEOPLE.filter(p =>
+    ? allPeopleWithRegistry.filter(p =>
         normalize(p.name).includes(q) ||
         normalize(p.username).includes(q) ||
         (p.bio && normalize(p.bio).includes(q))
       )
-    : ALL_PEOPLE;
+    : allPeopleWithRegistry;
 
   const myFiltered = q.length > 0 && mode === "my"
     ? myContacts.filter(c =>
@@ -198,7 +206,12 @@ export default function ContactsPanel({ onStartChat }: Props) {
                     {person.online && <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 rounded-full border-2 border-background online-dot" />}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="font-semibold text-sm">{person.name}</p>
+                    <div className="flex items-center gap-1.5">
+                      <p className="font-semibold text-sm">{person.name}</p>
+                      {registryUsers.find(u => u.id === person.id) && (
+                        <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-green-500/20 text-green-400 font-semibold">В сети</span>
+                      )}
+                    </div>
                     <p className="text-[11px] text-muted-foreground">@{person.username}</p>
                   </div>
                   {isAdded ? (

@@ -1,5 +1,6 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
+import { registerUser } from "@/lib/usersRegistry";
 
 interface Props {
   onLogin: (user: { name: string; avatar: string; username: string }) => void;
@@ -21,7 +22,15 @@ export default function AuthScreen({ onLogin }: Props) {
     e.preventDefault();
     const displayName = name || "Александр Новый";
     const initials = displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
-    onLogin({ name: displayName, avatar: initials, username: displayName.toLowerCase().replace(" ", "_") });
+    const username = displayName.toLowerCase().replace(/\s+/g, "_");
+    const userData = { name: displayName, avatar: initials, username };
+    registerUser(userData);
+    onLogin(userData);
+  };
+
+  const handleDemoLogin = (u: typeof DEMO_USERS[0]) => {
+    registerUser(u);
+    onLogin(u);
   };
 
   return (
@@ -109,7 +118,7 @@ export default function AuthScreen({ onLogin }: Props) {
                 {DEMO_USERS.map((u) => (
                   <button
                     key={u.username}
-                    onClick={() => onLogin(u)}
+                    onClick={() => handleDemoLogin(u)}
                     className="flex-1 flex flex-col items-center gap-1 p-2 rounded-xl bg-secondary hover:bg-border transition-all duration-200 group"
                   >
                     <div className="w-8 h-8 rounded-full btn-gradient flex items-center justify-center text-[10px] font-bold text-white group-hover:scale-110 transition-transform">
