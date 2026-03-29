@@ -6,11 +6,12 @@ interface Props {
   chat: Chat;
   currentUserId: string;
   onUpdateChat: (chat: Chat) => void;
+  onBack?: () => void;
 }
 
 const REACTIONS = ["👍", "❤️", "😂", "😮", "😢", "🔥"];
 
-export default function ChatWindow({ chat, currentUserId, onUpdateChat }: Props) {
+export default function ChatWindow({ chat, currentUserId, onUpdateChat, onBack }: Props) {
   const [inputText, setInputText] = useState("");
   const [replyTo, setReplyTo] = useState<Message | null>(null);
   const [editingMsg, setEditingMsg] = useState<Message | null>(null);
@@ -93,6 +94,11 @@ export default function ChatWindow({ chat, currentUserId, onUpdateChat }: Props)
       {/* Header */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-border bg-card/80 backdrop-blur-sm">
         <div className="flex items-center gap-2.5">
+          {onBack && (
+            <button onClick={onBack} className="w-7 h-7 rounded-lg hover:bg-secondary flex items-center justify-center text-muted-foreground transition-colors flex-shrink-0">
+              <Icon name="ChevronLeft" size={18} />
+            </button>
+          )}
           <div className="relative">
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold text-white ${
               chat.type === "group" ? "bg-gradient-to-br from-purple-500 to-pink-500" : "btn-gradient"
